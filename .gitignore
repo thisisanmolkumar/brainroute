@@ -1,0 +1,79 @@
+# ==========================================
+# Environment & Secrets
+# ==========================================
+
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+
+# ==========================================
+# Python / uv
+# ==========================================
+
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+build/
+dist/
+
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+
+.coverage
+htmlcov/
+
+# ==========================================
+# Editors & Operating System
+# ==========================================
+
+.DS_Store
+
+.idea/
+
+.vscode/*
+!.vscode/extensions.json
+
+# ==========================================
+# Frontend / Next.js
+# ==========================================
+
+node_modules/
+.next/
+.nuxt/
+out/
+
+# ==========================================
+# Machine Learning
+# ==========================================
+
+datasets/raw/
+datasets/processed/
+
+checkpoints/
+artifacts/
+
+mlruns/
+wandb/
+
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# ==========================================
+# Logs & Local Databases
+# ==========================================
+
+logs/
+*.log
+
+*.db
+*.sqlite
+*.sqlite3
