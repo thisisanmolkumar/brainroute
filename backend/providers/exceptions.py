@@ -16,3 +16,7 @@ class ProviderTimeoutError(LLMProviderError):
 
 class ProviderConfigurationError(LLMProviderError):
     """Invalid provider or model configuration."""
+
+
+class ProviderResponseError(LLMProviderError):
+    """Provider returned an unusable response."""

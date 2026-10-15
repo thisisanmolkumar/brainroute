@@ -62,3 +62,5 @@ class LLMResponse(BaseModel):
     provider_response_id: str | None = None
 
     finish_reason: str | None = None
+
+    status: str = "completed"
