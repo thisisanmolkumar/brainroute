@@ -42,8 +42,7 @@ class OpenAIProvider(BaseLLMProvider):
             api_key = get_settings().openai_api_key
 
             if not api_key or not api_key.strip():
-                raise ProviderAuthenticationError(
-                    "OPENAI_API_KEY is not configured")
+                raise ProviderAuthenticationError("OPENAI_API_KEY is not configured")
 
             self._client = AsyncOpenAI(
                 api_key=api_key,
@@ -134,8 +133,7 @@ class OpenAIProvider(BaseLLMProvider):
                     "or is unavailable to this API project"
                 ) from exc
 
-            raise LLMProviderError(
-                f"OpenAI returned HTTP {exc.status_code}") from exc
+            raise LLMProviderError(f"OpenAI returned HTTP {exc.status_code}") from exc
 
         except APIError as exc:
             raise LLMProviderError("Unexpected OpenAI API error") from exc

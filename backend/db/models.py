@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 
 from sqlalchemy import (
+    JSON,
     DateTime,
     ForeignKey,
     Numeric,
@@ -62,22 +63,109 @@ class Execution(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    task_id: Mapped[int] = mapped_column(ForeignKey("tasks.id"))
+    # Relationships
+    task_id: Mapped[int] = mapped_column(
+        ForeignKey("tasks.id"),
+        nullable=False,
+    )
 
-    model_config_id: Mapped[int] = mapped_column(ForeignKey("model_configs.id"))
+    model_config_id: Mapped[int] = mapped_column(
+        ForeignKey("model_configs.id"),
+        nullable=False,
+    )
 
-    status: Mapped[str] = mapped_column(String(32), default="pending")
+    # Execution status
+    status: Mapped[str] = mapped_column(
+        String(32),
+        default="pending",
+        nullable=False,
+    )
 
-    success: Mapped[bool | None] = mapped_column(nullable=True)
+    # Reserved for independent task verification
+    success: Mapped[bool | None] = mapped_column(
+        nullable=True,
+    )
 
-    input_tokens: Mapped[int | None] = mapped_column(nullable=True)
+    # Model response
+    output_text: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
 
-    output_tokens: Mapped[int | None] = mapped_column(nullable=True)
+    provider_response_id: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+    )
 
-    cost_usd: Mapped[Decimal | None] = mapped_column(Numeric(14, 8), nullable=True)
+    service_tier: Mapped[str | None] = mapped_column(
+        String(32),
+        nullable=True,
+    )
 
-    latency_ms: Mapped[int | None] = mapped_column(nullable=True)
+    # Token usage
+    input_tokens: Mapped[int | None] = mapped_column(
+        nullable=True,
+    )
 
+    output_tokens: Mapped[int | None] = mapped_column(
+        nullable=True,
+    )
+
+    cached_input_tokens: Mapped[int | None] = mapped_column(
+        nullable=True,
+    )
+
+    cache_write_tokens: Mapped[int | None] = mapped_column(
+        nullable=True,
+    )
+
+    reasoning_tokens: Mapped[int | None] = mapped_column(
+        nullable=True,
+    )
+
+    # Cost
+    cost_usd: Mapped[Decimal | None] = mapped_column(
+        Numeric(20, 12),
+        nullable=True,
+    )
+
+    pricing_snapshot: Mapped[dict | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    metrics_warning: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    # Latency
+    latency_ms: Mapped[int | None] = mapped_column(
+        nullable=True,
+    )
+
+    end_to_end_latency_ms: Mapped[int | None] = mapped_column(
+        nullable=True,
+    )
+
+    # Error tracking
+    error_type: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    error_message: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    # Timestamps
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
+
+    finished_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
     )

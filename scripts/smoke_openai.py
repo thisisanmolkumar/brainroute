@@ -11,9 +11,7 @@ async def main():
     collector = MetricsCollector()
 
     request = LLMRequest(
-        prompt=(
-            "Explain binary search in three sentences."
-        ),
+        prompt=("Explain binary search in three sentences."),
         model_id="gpt-6-luna",
         effort="medium",
         max_output_tokens=2048,
@@ -25,9 +23,7 @@ async def main():
 
         response = await provider.execute(request)
 
-        end_to_end_latency_ms = (
-            perf_counter() - start
-        ) * 1000
+        end_to_end_latency_ms = (perf_counter() - start) * 1000
 
         metrics = collector.collect(
             response=response,
@@ -77,21 +73,11 @@ async def main():
         if metrics.cost:
             cost = metrics.cost
 
-            print(
-                f"Input:       ${cost.input_cost_usd:.8f}"
-            )
-            print(
-                f"Cached:      ${cost.cached_input_cost_usd:.8f}"
-            )
-            print(
-                f"Cache write: ${cost.cache_write_cost_usd:.8f}"
-            )
-            print(
-                f"Output:      ${cost.output_cost_usd:.8f}"
-            )
-            print(
-                f"Total:       ${cost.total_cost_usd:.8f}"
-            )
+            print(f"Input:       ${cost.input_cost_usd:.8f}")
+            print(f"Cached:      ${cost.cached_input_cost_usd:.8f}")
+            print(f"Cache write: ${cost.cache_write_cost_usd:.8f}")
+            print(f"Output:      ${cost.output_cost_usd:.8f}")
+            print(f"Total:       ${cost.total_cost_usd:.8f}")
 
             for note in cost.notes:
                 print("Note:", note)
@@ -101,15 +87,9 @@ async def main():
 
         print("\nLATENCY")
 
-        print(
-            f"Provider:   {metrics.provider_latency_ms:.2f} ms"
-        )
-        print(
-            f"End-to-end: {metrics.end_to_end_latency_ms:.2f} ms"
-        )
-        print(
-            f"Overhead:   {metrics.overhead_ms:.2f} ms"
-        )
+        print(f"Provider:   {metrics.provider_latency_ms:.2f} ms")
+        print(f"End-to-end: {metrics.end_to_end_latency_ms:.2f} ms")
+        print(f"Overhead:   {metrics.overhead_ms:.2f} ms")
 
     finally:
         await provider.close()
