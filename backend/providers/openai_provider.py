@@ -42,7 +42,8 @@ class OpenAIProvider(BaseLLMProvider):
             api_key = get_settings().openai_api_key
 
             if not api_key or not api_key.strip():
-                raise ProviderAuthenticationError("OPENAI_API_KEY is not configured")
+                raise ProviderAuthenticationError(
+                    "OPENAI_API_KEY is not configured")
 
             self._client = AsyncOpenAI(
                 api_key=api_key,
@@ -104,6 +105,7 @@ class OpenAIProvider(BaseLLMProvider):
                 },
                 max_output_tokens=max_tokens,
                 store=False,
+                service_tier="default",
             )
 
         except (AuthenticationError, PermissionDeniedError) as exc:
@@ -132,7 +134,8 @@ class OpenAIProvider(BaseLLMProvider):
                     "or is unavailable to this API project"
                 ) from exc
 
-            raise LLMProviderError(f"OpenAI returned HTTP {exc.status_code}") from exc
+            raise LLMProviderError(
+                f"OpenAI returned HTTP {exc.status_code}") from exc
 
         except APIError as exc:
             raise LLMProviderError("Unexpected OpenAI API error") from exc
@@ -175,6 +178,11 @@ class OpenAIProvider(BaseLLMProvider):
                 reasoning_tokens=getattr(
                     output_details,
                     "reasoning_tokens",
+                    None,
+                ),
+                cache_write_tokens=getattr(
+                    input_details,
+                    "cache_write_tokens",
                     None,
                 ),
             )
@@ -222,6 +230,11 @@ class OpenAIProvider(BaseLLMProvider):
             latency_ms=latency_ms,
             provider_response_id=response.id,
             finish_reason=finish_reason,
+            service_tier=getattr(
+                response,
+                "service_tier",
+                None,
+            ),
         )
 
     async def close(self) -> None:

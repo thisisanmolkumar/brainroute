@@ -1,14 +1,19 @@
 import asyncio
+from time import perf_counter
 
 from backend.providers.openai_provider import OpenAIProvider
 from backend.schemas.llm import LLMRequest
+from backend.services.metrics import MetricsCollector
 
 
 async def main():
     provider = OpenAIProvider()
+    collector = MetricsCollector()
 
     request = LLMRequest(
-        prompt=("Reply with exactly this sentence: BrainRoute is online."),
+        prompt=(
+            "Explain binary search in three sentences."
+        ),
         model_id="gpt-6-luna",
         effort="medium",
         max_output_tokens=2048,
@@ -16,39 +21,95 @@ async def main():
     )
 
     try:
+        start = perf_counter()
+
         response = await provider.execute(request)
 
-        print("\n========== BRAINROUTE ==========\n")
+        end_to_end_latency_ms = (
+            perf_counter() - start
+        ) * 1000
 
-        print("Provider:", response.provider)
+        metrics = collector.collect(
+            response=response,
+            end_to_end_latency_ms=end_to_end_latency_ms,
+        )
+
+        print("\n========== BRAINROUTE ==========")
+
+        print("\nEXECUTION")
         print("Model:", response.model_id)
         print("Effort:", response.effort)
         print("Status:", response.status)
 
-        print("\nResponse:")
+        print("\nRESPONSE")
         print(response.output_text)
 
-        print("\nExecution Metrics:")
-        print(f"Latency: {response.latency_ms:.2f} ms")
+        print("\nTOKEN USAGE")
 
-        if response.usage:
-            print("Input tokens:", response.usage.input_tokens)
-            print("Output tokens:", response.usage.output_tokens)
+        if metrics.usage:
+            print(
+                "Input tokens:",
+                metrics.usage.input_tokens,
+            )
+
+            print(
+                "Cached tokens:",
+                metrics.usage.cached_input_tokens,
+            )
+
+            print(
+                "Cache-write tokens:",
+                metrics.usage.cache_write_tokens,
+            )
+
+            print(
+                "Output tokens:",
+                metrics.usage.output_tokens,
+            )
 
             print(
                 "Reasoning tokens:",
-                response.usage.reasoning_tokens,
+                metrics.usage.reasoning_tokens,
             )
+
+        print("\nCOST")
+
+        if metrics.cost:
+            cost = metrics.cost
 
             print(
-                "Cached input tokens:",
-                response.usage.cached_input_tokens,
+                f"Input:       ${cost.input_cost_usd:.8f}"
+            )
+            print(
+                f"Cached:      ${cost.cached_input_cost_usd:.8f}"
+            )
+            print(
+                f"Cache write: ${cost.cache_write_cost_usd:.8f}"
+            )
+            print(
+                f"Output:      ${cost.output_cost_usd:.8f}"
+            )
+            print(
+                f"Total:       ${cost.total_cost_usd:.8f}"
             )
 
-        print("\nResponse ID:", response.provider_response_id)
+            for note in cost.notes:
+                print("Note:", note)
 
-        if response.finish_reason:
-            print("Finish reason:", response.finish_reason)
+        else:
+            print("Cost unavailable")
+
+        print("\nLATENCY")
+
+        print(
+            f"Provider:   {metrics.provider_latency_ms:.2f} ms"
+        )
+        print(
+            f"End-to-end: {metrics.end_to_end_latency_ms:.2f} ms"
+        )
+        print(
+            f"Overhead:   {metrics.overhead_ms:.2f} ms"
+        )
 
     finally:
         await provider.close()

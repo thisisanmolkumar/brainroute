@@ -30,10 +30,14 @@ class TokenUsage(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     input_tokens: int = Field(ge=0)
-
     output_tokens: int = Field(ge=0)
 
     cached_input_tokens: int | None = Field(
+        default=None,
+        ge=0,
+    )
+
+    cache_write_tokens: int | None = Field(
         default=None,
         ge=0,
     )
@@ -64,3 +68,5 @@ class LLMResponse(BaseModel):
     finish_reason: str | None = None
 
     status: str = "completed"
+
+    service_tier: str | None = None

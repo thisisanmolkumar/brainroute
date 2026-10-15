@@ -5,7 +5,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from backend.core.config import get_settings
 from backend.db.session import engine
 
-
 settings = get_settings()
 
 

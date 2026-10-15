@@ -39,7 +39,17 @@ class ModelPricing(BaseModel):
         ge=0,
     )
 
+    cache_write_per_1m_tokens: Decimal | None = Field(
+        default=None,
+        ge=0,
+    )
+
     output_per_1m_tokens: Decimal = Field(ge=0)
+
+    short_context_max_input_tokens: int | None = Field(
+        default=None,
+        gt=0,
+    )
 
 
 # ---------------------------------------
