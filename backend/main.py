@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
+from backend.api.v1 import executions, models
 from backend.core.config import get_settings
 from backend.db.session import engine
 
@@ -10,9 +11,29 @@ settings = get_settings()
 
 app = FastAPI(
     title=settings.app_name,
-    description="Intelligent Model and Reasoning Router",
+    description=("BrainRoute — Intelligent Model and Reasoning Router"),
     version="0.1.0",
 )
+
+
+# ----------------------------------------
+# API Routers
+# ----------------------------------------
+
+app.include_router(
+    models.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    executions.router,
+    prefix="/api/v1",
+)
+
+
+# ----------------------------------------
+# Existing Endpoints
+# ----------------------------------------
 
 
 @app.get("/")
