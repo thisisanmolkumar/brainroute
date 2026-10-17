@@ -77,3 +77,6 @@ logs/
 *.db
 *.sqlite
 *.sqlite3
+
+.brainroute_collection.lock
+datasets/exports/

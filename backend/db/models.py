@@ -195,6 +195,16 @@ class BenchmarkRun(Base):
         nullable=True,
     )
 
+    plan_json: Mapped[dict | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
+
+    max_total_cost_usd: Mapped[Decimal | None] = mapped_column(
+        Numeric(20, 12),
+        nullable=True,
+    )
+
 
 class BenchmarkAttempt(Base):
     __tablename__ = "benchmark_attempts"
@@ -205,6 +215,7 @@ class BenchmarkAttempt(Base):
             "benchmark_task_id",
             "model_id",
             "effort",
+            "repeat_index",
             name="uq_benchmark_attempt",
         ),
     )
@@ -269,4 +280,10 @@ class BenchmarkAttempt(Base):
     finished_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
+    )
+
+    repeat_index: Mapped[int] = mapped_column(
+        nullable=False,
+        default=0,
+        server_default="0",
     )
