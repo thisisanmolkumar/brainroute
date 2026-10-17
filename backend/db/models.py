@@ -169,3 +169,104 @@ class Execution(Base):
         DateTime(timezone=True),
         nullable=True,
     )
+
+
+class BenchmarkRun(Base):
+    __tablename__ = "benchmark_runs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    dataset_path: Mapped[str] = mapped_column(Text)
+    dataset_sha256: Mapped[str] = mapped_column(String(64))
+
+    status: Mapped[str] = mapped_column(
+        String(32),
+        default="running",
+        nullable=False,
+    )
+
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
+
+    finished_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+
+
+class BenchmarkAttempt(Base):
+    __tablename__ = "benchmark_attempts"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "run_id",
+            "benchmark_task_id",
+            "model_id",
+            "effort",
+            name="uq_benchmark_attempt",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    run_id: Mapped[int] = mapped_column(
+        ForeignKey("benchmark_runs.id"),
+        nullable=False,
+    )
+
+    benchmark_task_id: Mapped[str] = mapped_column(
+        String(128),
+        nullable=False,
+    )
+
+    model_id: Mapped[str] = mapped_column(
+        String(128),
+        nullable=False,
+    )
+
+    effort: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+    )
+
+    execution_id: Mapped[int | None] = mapped_column(
+        ForeignKey("executions.id"),
+        nullable=True,
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(32),
+        default="pending",
+        nullable=False,
+    )
+
+    verification_status: Mapped[str | None] = mapped_column(
+        String(32),
+        nullable=True,
+    )
+
+    correct: Mapped[bool | None] = mapped_column(
+        nullable=True,
+    )
+
+    predicted_answer: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    error_type: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+    )
+
+    finished_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from collections.abc import Awaitable, Callable
 from time import perf_counter
 
 from backend.core.model_registry import ModelRegistry
@@ -42,6 +43,7 @@ class ExecutionService:
         self,
         request: LLMRequest,
         category: str | None = None,
+        on_created: Callable[[int], Awaitable[None]] | None = None,
     ) -> ExecutionResult:
 
         start_time = perf_counter()
@@ -95,6 +97,9 @@ class ExecutionService:
         # ----------------------------------
 
         try:
+            if on_created is not None:
+                await on_created(execution_id)
+
             response = await self.provider.execute(request)
 
         except Exception as exc:
