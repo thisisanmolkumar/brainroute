@@ -80,3 +80,6 @@ logs/
 
 .brainroute_collection.lock
 datasets/exports/
+
+# Generated ML datasets
+datasets/ml/

@@ -1,0 +1,123 @@
+{
+  "run_id": 3,
+  "dataset_sha256": "7c0565a9c7671748d4cd8edef69477da93e12194132e11f22b9fbdd87df88090",
+  "total_records": 12,
+  "configurations": [
+    {
+      "model_id": "gpt-6-luna",
+      "effort": "high",
+      "planned": 6,
+      "terminal": 6,
+      "pending": 0,
+      "uncertain": 0,
+      "correct": 6,
+      "incorrect": 0,
+      "unparseable": 0,
+      "skipped": 0,
+      "errors": 0,
+      "strict_success_rate": 1.0,
+      "verified_accuracy": 1.0,
+      "known_cost_attempts": 6,
+      "total_known_cost_usd": "0.000208200000",
+      "mean_known_cost_usd": "0.000034700000",
+      "median_known_cost_usd": "0.000036100000",
+      "cost_per_success_usd": "0.000034700000",
+      "latency_samples": 6,
+      "mean_latency_ms": 3094.6666666666665,
+      "median_latency_ms": 2041.0,
+      "p90_latency_ms": 8569.0,
+      "p95_latency_ms": 8569.0
+    },
+    {
+      "model_id": "gpt-6-luna",
+      "effort": "medium",
+      "planned": 6,
+      "terminal": 6,
+      "pending": 0,
+      "uncertain": 0,
+      "correct": 6,
+      "incorrect": 0,
+      "unparseable": 0,
+      "skipped": 0,
+      "errors": 0,
+      "strict_success_rate": 1.0,
+      "verified_accuracy": 1.0,
+      "known_cost_attempts": 6,
+      "total_known_cost_usd": "0.000192200000",
+      "mean_known_cost_usd": "0.00003203333333333333333333333333",
+      "median_known_cost_usd": "0.000030650000",
+      "cost_per_success_usd": "0.00003203333333333333333333333333",
+      "latency_samples": 6,
+      "mean_latency_ms": 1722.5,
+      "median_latency_ms": 1801.5,
+      "p90_latency_ms": 1946.0,
+      "p95_latency_ms": 1946.0
+    }
+  ],
+  "domains": [
+    {
+      "domain": "logic",
+      "model_id": "gpt-6-luna",
+      "effort": "high",
+      "terminal": 2,
+      "correct": 2,
+      "strict_success_rate": 1.0
+    },
+    {
+      "domain": "logic",
+      "model_id": "gpt-6-luna",
+      "effort": "medium",
+      "terminal": 2,
+      "correct": 2,
+      "strict_success_rate": 1.0
+    },
+    {
+      "domain": "math",
+      "model_id": "gpt-6-luna",
+      "effort": "high",
+      "terminal": 4,
+      "correct": 4,
+      "strict_success_rate": 1.0
+    },
+    {
+      "domain": "math",
+      "model_id": "gpt-6-luna",
+      "effort": "medium",
+      "terminal": 4,
+      "correct": 4,
+      "strict_success_rate": 1.0
+    }
+  ],
+  "effort_comparisons": [
+    {
+      "model_id": "gpt-6-luna",
+      "lower_effort": "medium",
+      "higher_effort": "high",
+      "matched_attempts": 6,
+      "improvements": 0,
+      "regressions": 0,
+      "success_rate_delta_pp": 0.0,
+      "paired_cost_attempts": 6,
+      "mean_cost_delta_usd": "0.000002666666666666666666666666667"
+    }
+  ],
+  "pareto_frontier": [
+    "gpt-6-luna / medium"
+  ],
+  "oracle": {
+    "comparable_cases": 6,
+    "solved_cases": 6,
+    "oracle_success_rate": 1.0,
+    "cheapest_successful_cost_usd": "0.000190700000",
+    "avg_cost_per_solved_case_usd": "0.00003178333333333333333333333333",
+    "selected_counts": {
+      "gpt-6-luna / medium": 5,
+      "gpt-6-luna / high": 1
+    },
+    "best_fixed_configuration": "gpt-6-luna / medium",
+    "best_fixed_success_rate": 1.0
+  },
+  "warnings": [
+    "Fewer than 30 task/repetition cases were observed. Treat comparisons as exploratory."
+  ]
+}
