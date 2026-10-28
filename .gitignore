@@ -83,3 +83,6 @@ datasets/exports/
 
 # Generated ML datasets
 datasets/ml/
+
+# Trained ML models and artifacts
+models/brainroute_xgb_v1/
