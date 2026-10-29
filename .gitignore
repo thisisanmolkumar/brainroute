@@ -86,3 +86,4 @@ datasets/ml/
 
 # Trained ML models and artifacts
 models/
+reports/generated/
