@@ -104,6 +104,17 @@ class CollectionRepository:
                 status=run.status,
             )
 
+    def find_run_by_v2_plan_id(self, plan_id: str) -> int | None:
+        """Avoid accidentally starting the same paid v2 plan twice."""
+        with SessionLocal() as session:
+            statement = (
+                select(BenchmarkRun.id)
+                .where(BenchmarkRun.plan_json["v2"]["plan_id"].as_string() == plan_id)
+                .order_by(BenchmarkRun.id)
+                .limit(1)
+            )
+            return session.scalar(statement)
+
     def list_attempts(
         self,
         run_id: int,

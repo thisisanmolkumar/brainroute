@@ -128,7 +128,7 @@ def adapt_mbpp(
     task_id = record.get("task_id")
 
     if isinstance(task_id, bool) or not isinstance(task_id, int):
-        raise ValueError("MBPP requires an integer task_id")
+        raise TypeError("MBPP requires an integer task_id")
 
     prompt_field = "prompt" if config == "sanitized" else "text"
 
@@ -161,7 +161,7 @@ def adapt_mbpp(
     reference_solution = record.get("code", "")
 
     if not isinstance(reference_solution, str):
-        raise ValueError("Invalid reference solution")
+        raise TypeError("Invalid reference solution")
 
     solution_hash = hashlib.sha256(reference_solution.encode("utf-8")).hexdigest()
 
@@ -249,7 +249,7 @@ def adapt_ifeval(
     key = record.get("key")
 
     if isinstance(key, bool) or not isinstance(key, int):
-        raise ValueError("IFEval requires an integer key")
+        raise TypeError("IFEval requires an integer key")
 
     prompt = require_string(record, "prompt")
 

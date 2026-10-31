@@ -1,0 +1,17 @@
+{
+  "schema_version": 2,
+  "source": "gsm8k",
+  "upstream_dataset": "openai/gsm8k",
+  "upstream_config": "main",
+  "upstream_split": "train",
+  "source_revision": "740312add88f781978c0658806c59bc2815b9866",
+  "local_source_sha256": null,
+  "imported_tasks": 300,
+  "ready_tasks": 300,
+  "pending_tasks": 0,
+  "source_splits": {
+    "train": 300
+  },
+  "output_sha256": "bf2d38e6403dd3755786ff689bc3f45e05f719e9d9443a4536bca909cfb00cc7",
+  "collection_enabled": false
+}

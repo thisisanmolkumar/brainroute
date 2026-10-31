@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "protocol_version": "v2-pilot-1",
+  "execution_enabled": false,
+  "pool_split": "train",
+  "seed": 42,
+  "budget_usd": "0.50",
+  "per_attempt_cap_usd": "0.005",
+  "max_inflight": 1,
+  "max_output_tokens": 256,
+  "timeout_seconds": 30,
+  "selected_tasks": 8,
+  "planned_attempts": 32,
+  "candidates": [
+    {
+      "model_id": "gpt-5.4-mini",
+      "effort": "high"
+    },
+    {
+      "model_id": "gpt-5.4-mini",
+      "effort": "medium"
+    },
+    {
+      "model_id": "gpt-6-luna",
+      "effort": "high"
+    },
+    {
+      "model_id": "gpt-6-luna",
+      "effort": "medium"
+    }
+  ],
+  "excluded": {
+    "sample_limit": 17,
+    "verifier_not_ready": 19
+  },
+  "plan_id": "2c43c6bed4842aaa937072ebab3d64c9a15d21e80235292d1086b7fab9a160a2",
+  "pool_sha256": "b1cd9756432845aa9e872ea9e5a9f2b7c5b5950cf7934fe8fb94fe60b323616a",
+  "legacy_data_sha256": {
+    "datasets/ml/v1/train.jsonl": "4dd04ac3111269f0daaa9099467568ee12e9590d11b7f60a2e82294291395704",
+    "datasets/ml/v1/validation.jsonl": "25047e3857f57105b4d2998163c278c0d0dd4a465e672f02b5bd34d80b64ad37"
+  },
+  "attempts_sha256": "7c0e47bd22d22e444e25aec0deaa93d40b9574d054d15d39c788a873f84021c7"
+}

@@ -236,6 +236,9 @@ class CollectionRunner:
         resume_run_id: int | None = None,
         on_progress: Callable[[str], None] | None = None,
         increase_budget_to: Decimal | None = None,
+        timeout_seconds: float | None = None,
+        max_estimated_attempt_cost_usd: Decimal | None = None,
+        plan_metadata: dict | None = None,
     ) -> CollectionSummary:
 
         path = Path(dataset_path)
@@ -247,6 +250,16 @@ class CollectionRunner:
 
         if resume_run_id is None and increase_budget_to is not None:
             raise ValueError("Budget increases require an existing run")
+
+        if timeout_seconds is not None and not 0 < timeout_seconds <= 120:
+            raise ValueError("timeout_seconds must be within (0, 120]")
+        if max_estimated_attempt_cost_usd is not None and (
+            not max_estimated_attempt_cost_usd.is_finite()
+            or max_estimated_attempt_cost_usd <= 0
+        ):
+            raise ValueError("Invalid estimated per-attempt cost limit")
+        if plan_metadata is not None and not isinstance(plan_metadata, dict):
+            raise ValueError("Invalid collection plan metadata")
 
         # ----------------------------------
         # 1. Create or resume experiment
@@ -268,8 +281,8 @@ class CollectionRunner:
             if not 16 <= max_output_tokens <= 4096:
                 raise ValueError("Invalid output-token limit")
 
-            if budget_usd <= 0:
-                raise ValueError("Budget must be positive")
+            if not budget_usd.is_finite() or budget_usd <= 0:
+                raise ValueError("Budget must be positive and finite")
 
             schedule = build_schedule(
                 tasks,
@@ -294,12 +307,20 @@ class CollectionRunner:
                     if model.provider != self.execution_service.provider.name:
                         raise ValueError("Configuration uses another provider")
 
-                    estimate_attempt_cost(
+                    estimated = estimate_attempt_cost(
                         task,
                         config,
                         self.registry,
                         max_output_tokens,
                     )
+                    if (
+                        max_estimated_attempt_cost_usd is not None
+                        and estimated > max_estimated_attempt_cost_usd
+                    ):
+                        raise ValueError(
+                            "Estimated attempt cost exceeds the planned "
+                            "per-attempt limit"
+                        )
 
             plan = {
                 "version": 1,
@@ -315,6 +336,13 @@ class CollectionRunner:
                     for config in configurations
                 ],
             }
+
+            if plan_metadata is not None:
+                plan["v2"] = plan_metadata
+                plan["timeout_seconds"] = timeout_seconds
+                plan["max_estimated_attempt_cost_usd"] = str(
+                    max_estimated_attempt_cost_usd
+                )
 
             run_id = await asyncio.to_thread(
                 self.repository.create_run,
@@ -349,6 +377,19 @@ class CollectionRunner:
 
             if plan.get("version") != 1:
                 raise ValueError("Unsupported experiment plan")
+
+            # A v2 resume must supply and match the original plan identity.
+            if plan.get("v2") != plan_metadata:
+                raise ValueError("Collection plan identity mismatch on resume")
+            if plan_metadata is not None:
+                if timeout_seconds != plan.get("timeout_seconds"):
+                    raise ValueError("Collection timeout differs from saved plan")
+                if str(max_estimated_attempt_cost_usd) != plan.get(
+                    "max_estimated_attempt_cost_usd"
+                ):
+                    raise ValueError("Per-attempt limit differs from saved plan")
+                if increase_budget_to is not None:
+                    raise ValueError("v2 budgets are immutable; create a new plan")
 
             if plan["task_ids"] != [task.task_id for task in tasks]:
                 raise ValueError("Dataset task IDs differ from saved plan")
@@ -433,6 +474,14 @@ class CollectionRunner:
                     max_output_tokens,
                 )
 
+                # The per-attempt cap is a conservative estimate, not
+                # an absolute provider billing guarantee.
+                if (
+                    max_estimated_attempt_cost_usd is not None
+                    and estimate > max_estimated_attempt_cost_usd
+                ):
+                    raise ValueError("Estimated per-attempt limit exceeded")
+
                 # Adaptive per-request budget check.
                 if spent + estimate > effective_budget:
                     break
@@ -460,6 +509,11 @@ class CollectionRunner:
                     model_id=config.model_id,
                     effort=config.effort,
                     max_output_tokens=max_output_tokens,
+                    **(
+                        {"timeout_seconds": timeout_seconds}
+                        if timeout_seconds is not None
+                        else {}
+                    ),
                 )
 
                 # ----------------------------------

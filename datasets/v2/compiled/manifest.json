@@ -8,8 +8,8 @@
       "sha256": "abe78c9f5d242f3093c00414146692620acd600633b5690a98af0d19ddeafb17"
     },
     {
-      "path": "datasets/v2/sources/gsm8k_train_30.jsonl",
-      "sha256": "2835b0154532c866696ddeefd0e9543d873a9030ab60beb43406a36a321fd2bd"
+      "path": "datasets/v2/sources/gsm8k_train_300.jsonl",
+      "sha256": "bf2d38e6403dd3755786ff689bc3f45e05f719e9d9443a4536bca909cfb00cc7"
     },
     {
       "path": "datasets/v2/sources/mbpp_train_20.jsonl",
@@ -24,87 +24,91 @@
       "sha256": "3aa747022aa055cab027eaf62324b4bcd2c4603a50b65c97d9a3049bdf33913c"
     }
   ],
-  "source_tasks": 95,
-  "connected_task_groups": 95,
+  "source_tasks": 365,
+  "connected_task_groups": 365,
   "exact_duplicates_removed": 0,
-  "compiled_tasks": 95,
+  "compiled_tasks": 365,
   "splits": {
     "train": {
-      "tasks": 44,
-      "groups": 44,
-      "ready": 25,
+      "tasks": 239,
+      "groups": 239,
+      "ready": 220,
       "pending": 19,
       "domains": {
         "coding": 16,
         "instruction": 1,
-        "math": 27
+        "math": 222
       },
       "difficulties": {
         "easy": 3,
         "medium": 1,
-        "unknown": 40
+        "unknown": 235
       },
       "sources": {
         "brainroute-original": 4,
-        "gsm8k": 25,
+        "gsm8k": 220,
         "mbpp": 15
       },
-      "sha256": "b1cd9756432845aa9e872ea9e5a9f2b7c5b5950cf7934fe8fb94fe60b323616a"
+      "sha256": "633b11dc921150bc9b20292f8741be4d230cc78ca9cbd1b2bca2cb1ddc34aa3a"
     },
     "validation": {
-      "tasks": 2,
-      "groups": 2,
-      "ready": 0,
+      "tasks": 28,
+      "groups": 28,
+      "ready": 26,
       "pending": 2,
       "domains": {
         "coding": 1,
-        "logic": 1
+        "logic": 1,
+        "math": 26
       },
       "difficulties": {
         "medium": 1,
-        "unknown": 1
+        "unknown": 27
       },
       "sources": {
         "brainroute-original": 1,
+        "gsm8k": 26,
         "mbpp": 1
       },
-      "sha256": "9be703aaaa8274396caa3037711ef027b052e630e01caf2193816fb45d889113"
+      "sha256": "df923f354be13cd6ea5730b9b7d814e89e865189bc6d740b5d6eb8ef67699aa9"
     },
     "calibration": {
-      "tasks": 4,
-      "groups": 4,
-      "ready": 0,
+      "tasks": 31,
+      "groups": 31,
+      "ready": 27,
       "pending": 4,
       "domains": {
-        "coding": 4
+        "coding": 4,
+        "math": 27
       },
       "difficulties": {
-        "unknown": 4
+        "unknown": 31
       },
       "sources": {
+        "gsm8k": 27,
         "mbpp": 4
       },
-      "sha256": "2b105042a6fdfa63c44aae7f0268e2e5b3f0391f1504678751f92c80b508137f"
+      "sha256": "afeb95127a4b2f1dc182448f532fb4d61a2ffcfd070d958b136feef595b36d24"
     },
     "test": {
-      "tasks": 45,
-      "groups": 45,
-      "ready": 25,
+      "tasks": 67,
+      "groups": 67,
+      "ready": 47,
       "pending": 20,
       "domains": {
         "instruction": 20,
         "logic": 20,
-        "math": 5
+        "math": 27
       },
       "difficulties": {
-        "unknown": 45
+        "unknown": 67
       },
       "sources": {
         "bbh": 20,
-        "gsm8k": 5,
+        "gsm8k": 27,
         "ifeval": 20
       },
-      "sha256": "a7b4cbd872323066862505f18d21c7839f2ea0b94b22cb4fb3602b2addaa75ee"
+      "sha256": "ab5e08195a1452176eb4b1e5efc344427239296bd9c3871e2c4c7c143ae7ea16"
     }
   },
   "warnings": [

@@ -46,7 +46,7 @@ def local_records(path: Path) -> list[dict]:
             item = json.loads(line)
 
             if not isinstance(item, dict):
-                raise ValueError(f"{path}:{line_number}: expected object")
+                raise TypeError(f"{path}:{line_number}: expected object")
 
             records.append(item)
 
