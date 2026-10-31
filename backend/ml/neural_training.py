@@ -99,7 +99,8 @@ def fit_preprocessing(
         targets = example.targets
 
         if example.masks.cost:
-            cost_values.append(math.log1p(float(targets.mean_cost_usd) * COST_SCALE))
+            cost_values.append(math.log1p(
+                float(targets.mean_cost_usd) * COST_SCALE))
             cost_weights.append(targets.trials)
 
         if example.masks.latency:
@@ -169,7 +170,8 @@ def encode_inputs(
 
     normalized = (numbers - means) / stds
 
-    model_lookup = {value: index for index, value in enumerate(preprocessing["models"])}
+    model_lookup = {value: index for index,
+                    value in enumerate(preprocessing["models"])}
 
     effort_lookup = {
         value: index for index, value in enumerate(preprocessing["efforts"])
@@ -250,7 +252,8 @@ def make_dataset(
         )
 
         latencies.append(
-            (math.log1p(target.mean_latency_ms) - preprocessing["latency_mean"])
+            (math.log1p(target.mean_latency_ms) -
+             preprocessing["latency_mean"])
             / preprocessing["latency_std"]
             if valid_latency
             else 0.0
@@ -309,7 +312,6 @@ def train_neural_router(
 
     torch.manual_seed(seed)
     np.random.seed(seed)
-    torch.set_num_threads(2)
 
     # ----------------------------------
     # 1. Load and verify training data

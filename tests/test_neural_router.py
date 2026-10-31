@@ -74,7 +74,8 @@ def make_example(
 
     return MLExample(
         features=extract_features(
-            prompt=(f"Solve problem {index}. Calculate {index} + {index + 3}."),
+            prompt=(
+                f"Solve problem {index}. Calculate {index} + {index + 3}."),
             model_id=model_id,
             effort=effort,
         ),
@@ -175,13 +176,22 @@ def train_fixture(
         validation_path=validation_path,
         embedding_config_path=embedding_config_path,
         output_dir=output_dir,
-        epochs=8,
-        patience=3,
-        batch_size=16,
+        epochs=3,
+        patience=2,
+        batch_size=32,
         embedder=FakeEmbedder(),
     )
 
     return output_dir, report
+
+
+@pytest.fixture(scope="module")
+def trained_router(tmp_path_factory):
+    temporary_dir = tmp_path_factory.mktemp(
+        "neural_router_tests"
+    )
+
+    return train_fixture(temporary_dir)
 
 
 def test_neural_forward_shapes():
@@ -261,8 +271,8 @@ def test_all_missing_regression_labels():
     assert torch.isfinite(losses["total"])
 
 
-def test_training_creates_artifacts(tmp_path):
-    output_dir, report = train_fixture(tmp_path)
+def test_training_creates_artifacts(trained_router):
+    output_dir, report = trained_router
 
     for filename in [
         "model.pt",
@@ -280,8 +290,8 @@ def test_training_creates_artifacts(tmp_path):
     assert report["metrics"]["success"]["trials"] == 128
 
 
-def test_saved_model_inference(tmp_path):
-    output_dir, _ = train_fixture(tmp_path)
+def test_saved_model_inference(trained_router):
+    output_dir, _ = trained_router
 
     predictor = NeuralRouterPredictor(
         output_dir,
@@ -304,8 +314,8 @@ def test_saved_model_inference(tmp_path):
         assert result["predicted_latency_ms"] >= 0
 
 
-def test_unseen_model_rejected(tmp_path):
-    output_dir, _ = train_fixture(tmp_path)
+def test_unseen_model_rejected(trained_router):
+    output_dir, _ = trained_router
 
     predictor = NeuralRouterPredictor(
         output_dir,
