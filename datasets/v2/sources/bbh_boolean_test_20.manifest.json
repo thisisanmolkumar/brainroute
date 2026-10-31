@@ -1,0 +1,17 @@
+{
+  "schema_version": 2,
+  "source": "bbh",
+  "upstream_dataset": "lukaemon/bbh",
+  "upstream_config": "boolean_expressions",
+  "upstream_split": "test",
+  "source_revision": "982bb89fd79532a8ac676a61fc42eb1aeec63f99",
+  "local_source_sha256": null,
+  "imported_tasks": 20,
+  "ready_tasks": 20,
+  "pending_tasks": 0,
+  "source_splits": {
+    "test": 20
+  },
+  "output_sha256": "0ccdaab6580a92989b6ad0e1b374d712c02c860d5e6ad860004b96b315c94436",
+  "collection_enabled": false
+}

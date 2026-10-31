@@ -1,0 +1,17 @@
+{
+  "schema_version": 2,
+  "source": "ifeval",
+  "upstream_dataset": "google/IFEval",
+  "upstream_config": null,
+  "upstream_split": "train",
+  "source_revision": "966cd89545d6b6acfd7638bc708b98261ca58e84",
+  "local_source_sha256": null,
+  "imported_tasks": 20,
+  "ready_tasks": 0,
+  "pending_tasks": 20,
+  "source_splits": {
+    "test": 20
+  },
+  "output_sha256": "3aa747022aa055cab027eaf62324b4bcd2c4603a50b65c97d9a3049bdf33913c",
+  "collection_enabled": false
+}

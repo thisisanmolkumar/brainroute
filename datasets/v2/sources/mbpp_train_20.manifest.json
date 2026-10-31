@@ -1,0 +1,17 @@
+{
+  "schema_version": 2,
+  "source": "mbpp",
+  "upstream_dataset": "google-research-datasets/mbpp",
+  "upstream_config": "sanitized",
+  "upstream_split": "train",
+  "source_revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+  "local_source_sha256": null,
+  "imported_tasks": 20,
+  "ready_tasks": 0,
+  "pending_tasks": 20,
+  "source_splits": {
+    "train": 20
+  },
+  "output_sha256": "ffaf3c6737f47e935a8247a09b31386eb61118fc810af4d26fab8007537aa308",
+  "collection_enabled": false
+}
