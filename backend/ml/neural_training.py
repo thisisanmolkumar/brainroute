@@ -78,13 +78,19 @@ def fit_preprocessing(
 ) -> dict:
     features = [item.features for item in train]
 
-    numbers = numeric_matrix(features)
+    # Fit statistics in float64 to avoid precision
+    # problems with nearly constant features.
+    numbers = numeric_matrix(features).astype(np.float64)
 
     numeric_mean = numbers.mean(axis=0)
     numeric_std = numbers.std(axis=0)
 
+    # Treat near-constant features as unscaled offsets.
+    # A tiny variance must not amplify input differences.
+    MIN_FEATURE_STD = 1e-3
+
     numeric_std = np.where(
-        numeric_std > 1e-6,
+        numeric_std >= MIN_FEATURE_STD,
         numeric_std,
         1.0,
     )
@@ -99,8 +105,7 @@ def fit_preprocessing(
         targets = example.targets
 
         if example.masks.cost:
-            cost_values.append(math.log1p(
-                float(targets.mean_cost_usd) * COST_SCALE))
+            cost_values.append(math.log1p(float(targets.mean_cost_usd) * COST_SCALE))
             cost_weights.append(targets.trials)
 
         if example.masks.latency:
@@ -156,22 +161,21 @@ def encode_inputs(
     if embeddings.shape != expected_shape:
         raise ValueError("Unexpected sentence embedding dimensions")
 
-    numbers = numeric_matrix(features)
+    numbers = numeric_matrix(features).astype(np.float64)
 
     means = np.asarray(
         preprocessing["numeric_mean"],
-        dtype=np.float32,
+        dtype=np.float64,
     )
 
     stds = np.asarray(
         preprocessing["numeric_std"],
-        dtype=np.float32,
+        dtype=np.float64,
     )
 
-    normalized = (numbers - means) / stds
+    normalized = ((numbers - means) / stds).astype(np.float32)
 
-    model_lookup = {value: index for index,
-                    value in enumerate(preprocessing["models"])}
+    model_lookup = {value: index for index, value in enumerate(preprocessing["models"])}
 
     effort_lookup = {
         value: index for index, value in enumerate(preprocessing["efforts"])
@@ -252,8 +256,7 @@ def make_dataset(
         )
 
         latencies.append(
-            (math.log1p(target.mean_latency_ms) -
-             preprocessing["latency_mean"])
+            (math.log1p(target.mean_latency_ms) - preprocessing["latency_mean"])
             / preprocessing["latency_std"]
             if valid_latency
             else 0.0
@@ -756,6 +759,14 @@ class NeuralRouterPredictor:
         if not requests:
             return []
 
+        supported_models = set(self.preprocessing["models"])
+
+        supported_efforts = set(self.preprocessing["efforts"])
+
+        for _, model_id, effort in requests:
+            if model_id not in supported_models or effort not in supported_efforts:
+                raise ValueError(f"Unknown model or effort: {model_id}/{effort}")
+
         if any(not prompt.strip() for prompt, _, _ in requests):
             raise ValueError("Prompt cannot be empty")
 
@@ -767,6 +778,11 @@ class NeuralRouterPredictor:
             )
             for prompt, model_id, effort in requests
         ]
+
+        validate_numeric_domain(
+            features,
+            self.preprocessing,
+        )
 
         inputs = encode_inputs(
             features,
@@ -789,9 +805,19 @@ class NeuralRouterPredictor:
             + self.preprocessing["latency_mean"]
         )
 
-        costs = np.expm1(np.clip(cost_log, 0.0, 20.0)) / COST_SCALE
+        def decode_prediction(log_value, scale=1.0):
+            value = float(log_value)
 
-        latencies = np.expm1(np.clip(latency_log, 0.0, 20.0))
+            # Invalid or saturated regression predictions
+            # must not be presented as valid estimates.
+            if not np.isfinite(value) or not 0 <= value < 20:
+                return None
+
+            return float(np.expm1(value) / scale)
+
+        costs = [decode_prediction(value, COST_SCALE) for value in cost_log]
+
+        latencies = [decode_prediction(value) for value in latency_log]
 
         results = []
 
@@ -802,12 +828,10 @@ class NeuralRouterPredictor:
                     "effort": effort,
                     "success_probability": float(success[index]),
                     "predicted_cost_usd": (
-                        float(costs[index])
-                        if self.preprocessing["cost_trained"]
-                        else None
+                        costs[index] if self.preprocessing["cost_trained"] else None
                     ),
                     "predicted_latency_ms": (
-                        float(latencies[index])
+                        latencies[index]
                         if self.preprocessing["latency_trained"]
                         else None
                     ),
@@ -824,3 +848,41 @@ class NeuralRouterPredictor:
     ) -> dict:
 
         return self.predict_many([(prompt, model_id, effort)])[0]
+
+
+def validate_numeric_domain(
+    features: list[MLFeatures],
+    preprocessing: dict,
+    z_limit: float = 8.0,
+) -> None:
+    numbers = numeric_matrix(features).astype(np.float64)
+
+    means = np.asarray(
+        preprocessing["numeric_mean"],
+        dtype=np.float64,
+    )
+
+    stds = np.asarray(
+        preprocessing["numeric_std"],
+        dtype=np.float64,
+    )
+
+    z_scores = (numbers - means) / stds
+
+    if not np.isfinite(z_scores).all():
+        raise ValueError("Nonfinite numerical features detected")
+
+    violations = np.argwhere(np.abs(z_scores) > z_limit)
+
+    if len(violations):
+        row, col = violations[0]
+
+        feature_name = NUMERIC_FIELDS[col]
+        value = z_scores[row, col]
+
+        raise ValueError(
+            "Out-of-distribution prompt: "
+            f"{feature_name} has z-score {value:.2f}. "
+            "The router cannot reliably predict "
+            "this task using its current training data."
+        )

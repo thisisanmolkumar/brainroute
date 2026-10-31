@@ -13,13 +13,17 @@ from backend.benchmarks.ml_dataset import (
     TargetMasks,
     extract_features,
 )
+from backend.ml.features import NUMERIC_FIELDS
 from backend.ml.neural_router import (
     NeuralRouter,
     multitask_loss,
 )
 from backend.ml.neural_training import (
     NeuralRouterPredictor,
+    fit_preprocessing,
+    numeric_matrix,
     train_neural_router,
+    validate_numeric_domain,
 )
 
 
@@ -74,8 +78,7 @@ def make_example(
 
     return MLExample(
         features=extract_features(
-            prompt=(
-                f"Solve problem {index}. Calculate {index} + {index + 3}."),
+            prompt=(f"Solve problem {index}. Calculate {index} + {index + 3}."),
             model_id=model_id,
             effort=effort,
         ),
@@ -187,9 +190,7 @@ def train_fixture(
 
 @pytest.fixture(scope="module")
 def trained_router(tmp_path_factory):
-    temporary_dir = tmp_path_factory.mktemp(
-        "neural_router_tests"
-    )
+    temporary_dir = tmp_path_factory.mktemp("neural_router_tests")
 
     return train_fixture(temporary_dir)
 
@@ -298,11 +299,17 @@ def test_saved_model_inference(trained_router):
         embedder=FakeEmbedder(),
     )
 
+    prompt = make_example(
+        12,
+        "model-a",
+        "medium",
+    ).features.prompt
+
     results = predictor.predict_many(
         [
-            ("Calculate 12 + 13.", "model-a", "medium"),
-            ("Calculate 12 + 13.", "model-a", "high"),
-            ("Calculate 12 + 13.", "model-b", "high"),
+            (prompt, "model-a", "medium"),
+            (prompt, "model-a", "high"),
+            (prompt, "model-b", "high"),
         ]
     )
 
@@ -346,11 +353,78 @@ def test_head_without_labels_is_disabled(tmp_path):
         embedder=FakeEmbedder(),
     )
 
+    prompt = make_example(
+        12,
+        "model-a",
+        "medium",
+    ).features.prompt
+
     prediction = predictor.predict(
-        "Calculate 12 + 13.",
+        prompt,
         "model-a",
         "medium",
     )
 
     assert prediction["predicted_cost_usd"] is None
     assert prediction["predicted_latency_ms"] is not None
+
+
+def test_nearly_constant_feature_scaling():
+    examples = make_examples(0, 24)
+
+    preprocessing = fit_preprocessing(
+        examples,
+        embedding_dimension=12,
+        embedding_model="test-encoder",
+        embedding_revision="test-revision",
+    )
+
+    line_index = NUMERIC_FIELDS.index("line_count")
+
+    assert preprocessing["numeric_std"][line_index] == 1.0
+
+
+def test_out_of_distribution_detection():
+    features = extract_features(
+        prompt="Short prompt.",
+        model_id="model-a",
+        effort="medium",
+    )
+
+    numbers = numeric_matrix([features])[0]
+
+    means = numbers.astype(float).tolist()
+    means[0] += 10.0
+
+    preprocessing = {
+        "numeric_mean": means,
+        "numeric_std": [1.0] * len(NUMERIC_FIELDS),
+    }
+
+    with pytest.raises(
+        ValueError,
+        match="Out-of-distribution",
+    ):
+        validate_numeric_domain(
+            [features],
+            preprocessing,
+        )
+
+
+def test_predictor_rejects_ood_prompt(trained_router):
+    output_dir, _ = trained_router
+
+    predictor = NeuralRouterPredictor(
+        output_dir,
+        embedder=FakeEmbedder(),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="Out-of-distribution",
+    ):
+        predictor.predict(
+            "Calculate 12 + 13.",
+            "model-a",
+            "medium",
+        )

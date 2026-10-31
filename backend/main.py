@@ -3,6 +3,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from backend.api.v1 import executions, models
+from backend.api.v1.router import router as routing_router
 from backend.core.config import get_settings
 from backend.db.session import engine
 
@@ -27,6 +28,11 @@ app.include_router(
 
 app.include_router(
     executions.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    routing_router,
     prefix="/api/v1",
 )
 
